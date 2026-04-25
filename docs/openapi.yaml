@@ -1,0 +1,417 @@
+openapi: 3.0.3
+info:
+  title: TasteMatch API
+  version: 1.0.0
+  description: API for TasteMatch food discovery platform
+
+servers:
+  - url: https://api.tastematch.com
+
+paths:
+
+  /profiles/{user_id}:
+    get:
+      summary: Get user profile
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Profile data
+
+    patch:
+      summary: Update user profile
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        200:
+          description: Updated profile
+
+  /taste-profiles/{user_id}:
+    get:
+      summary: Get taste profile
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Taste profile
+
+    post:
+      summary: Create taste profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TasteProfile'
+      responses:
+        201:
+          description: Created
+
+    patch:
+      summary: Update taste profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TasteProfile'
+      responses:
+        200:
+          description: Updated
+
+  /restaurants:
+    get:
+      summary: Get all restaurants
+      responses:
+        200:
+          description: List of restaurants
+
+    post:
+      summary: Create restaurant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Restaurant'
+      responses:
+        201:
+          description: Created
+
+  /restaurants/{id}:
+    get:
+      summary: Get restaurant by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Restaurant
+
+    patch:
+      summary: Update restaurant
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Restaurant'
+      responses:
+        200:
+          description: Updated
+
+    delete:
+      summary: Delete restaurant
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Deleted
+
+  /dishes:
+    get:
+      summary: Get dishes with optional filters
+      parameters:
+        - in: query
+          name: spice_level
+          schema:
+            type: integer
+        - in: query
+          name: allergen_exclude
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of dishes
+
+    post:
+      summary: Create dish
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+      responses:
+        201:
+          description: Created
+
+  /dishes/{id}:
+    get:
+      summary: Get dish by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Dish
+
+    patch:
+      summary: Update dish
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+      responses:
+        200:
+          description: Updated
+
+    delete:
+      summary: Delete dish
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Deleted
+
+  /collections:
+    post:
+      summary: Create collection
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Collection'
+      responses:
+        201:
+          description: Created
+
+  /collections/{id}:
+    get:
+      summary: Get collection with dishes
+      parameters:
+        - in: path
+          name: id
+          required: true
+      responses:
+        200:
+          description: Collection data
+
+    delete:
+      summary: Delete collection
+      parameters:
+        - in: path
+          name: id
+          required: true
+      responses:
+        204:
+          description: Deleted
+
+  /collections/{id}/items:
+    post:
+      summary: Add dish to collection
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionItem'
+      responses:
+        201:
+          description: Added
+
+    delete:
+      summary: Remove dish from collection
+      parameters:
+        - in: query
+          name: dish_id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Removed
+
+  /interactions:
+    post:
+      summary: Create interaction (like/dislike)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interaction'
+      responses:
+        201:
+          description: Created
+
+    get:
+      summary: Get user interactions
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+      responses:
+        200:
+          description: Interactions
+
+  /forum-posts:
+    post:
+      summary: Create forum post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForumPost'
+      responses:
+        201:
+          description: Created
+
+    get:
+      summary: Get forum posts
+      responses:
+        200:
+          description: Posts list
+
+components:
+  schemas:
+
+    ProfileUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        allergy_filters:
+          type: array
+          items:
+            type: string
+        onboarding_complete:
+          type: boolean
+
+    TasteProfile:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        onboarding_selections:
+          type: object
+        inferred_from_likes:
+          type: boolean
+
+    Restaurant:
+      type: object
+      properties:
+        name:
+          type: string
+        vibe_category:
+          type: string
+        overall_experience_rating:
+          type: integer
+        added_by_user:
+          type: string
+          format: uuid
+
+    Dish:
+      type: object
+      properties:
+        restaurant_id:
+          type: string
+          format: uuid
+        spice_level:
+          type: integer
+        primary_texture:
+          type: string
+        additional_attributes:
+          type: object
+        allergens:
+          type: array
+          items:
+            type: string
+        photo_url:
+          type: string
+
+    Collection:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    CollectionItem:
+      type: object
+      properties:
+        collection_id:
+          type: string
+          format: uuid
+        dish_id:
+          type: string
+          format: uuid
+
+    Interaction:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        dish_id:
+          type: string
+          format: uuid
+        is_liked:
+          type: boolean
+
+    ForumPost:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        dish_id:
+          type: string
+          format: uuid
