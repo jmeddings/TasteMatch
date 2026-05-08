@@ -109,14 +109,29 @@ async function getTasteProfile(req, res) {
       .eq('user_id', user.id)
       .single()
 
-    if (error || !tasteProfile) {
-      return res.status(404).json({
+    if (tasteProfile) {
+      return res.json({ success: true, data: tasteProfile })
+    }
+
+    // If the row doesn't exist yet (common after migrations/manual DB setup), create a default.
+    const { data: created, error: createError } = await supabase
+      .from('taste_profiles')
+      .insert({
+        user_id: user.id,
+        preferences: {},
+        onboarding_complete: false
+      })
+      .select('user_id, preferences, onboarding_complete, updated_at')
+      .single()
+
+    if (createError || !created) {
+      return res.status(400).json({
         success: false,
-        error: 'TasteProfile not found'
+        error: createError?.message || 'Failed to create TasteProfile'
       })
     }
 
-    return res.json({ success: true, data: tasteProfile })
+    return res.json({ success: true, data: created })
   } catch (error) {
     console.error('Get taste profile error:', error)
     return res.status(500).json({ success: false, error: 'Failed to get TasteProfile' })
