@@ -1,6 +1,11 @@
-import { User, Settings, LogOut, Share2 } from 'lucide-react'
+import { useState } from 'react'
+import { User, Settings, LogOut, Share2, UserMinus, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 
 export function Profile() {
+  const [confirmUnfollowOpen, setConfirmUnfollowOpen] = useState(false)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -45,6 +50,31 @@ export function Profile() {
             </div>
             <span className="text-gray-400">›</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setConfirmUnfollowOpen(true)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-200"
+          >
+            <div className="flex items-center gap-3">
+              <UserMinus size={20} className="text-gray-600" />
+              <span className="font-medium">Unfollow User</span>
+            </div>
+            <span className="text-gray-400">›</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setConfirmDeleteOpen(true)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-200"
+          >
+            <div className="flex items-center gap-3">
+              <Trash2 size={20} className="text-red-600" />
+              <span className="font-medium text-red-600">Delete Account</span>
+            </div>
+            <span className="text-gray-400">›</span>
+          </button>
+
           <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-200">
             <div className="flex items-center gap-3">
               <LogOut size={20} className="text-red-600" />
@@ -54,6 +84,32 @@ export function Profile() {
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmUnfollowOpen}
+        title="Unfollow user"
+        message="Are you sure you want to unfollow this user?"
+        confirmLabel="Unfollow"
+        cancelLabel="Cancel"
+        isDanger
+        onCancel={() => setConfirmUnfollowOpen(false)}
+        onConfirm={() => {
+          setConfirmUnfollowOpen(false)
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Delete account"
+        message="This action cannot be undone. Are you sure you want to delete your account?"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        isDanger
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={() => {
+          setConfirmDeleteOpen(false)
+        }}
+      />
     </div>
   )
 }

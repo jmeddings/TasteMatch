@@ -1,14 +1,18 @@
-import { Heart, MapPin, Star } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Heart, MapPin, Star, Trash2 } from 'lucide-react'
+import { DishThumbnail } from '../components/DishThumbnail'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 
 export function Favorites() {
-  const favorites = [
+  const [favorites, setFavorites] = useState(() => [
     {
       id: 1,
       name: 'Spicy Ramen',
       restaurant: 'Ramen House',
       location: 'Downtown',
       rating: 4.8,
-      image: '/api/placeholder/300/200',
+      cuisine: 'Japanese',
+      photo_url: '/api/placeholder/96/96',
       flavors: ['Spicy', 'Savory', 'Rich']
     },
     {
@@ -17,10 +21,55 @@ export function Favorites() {
       restaurant: 'Pizza Palace',
       location: 'Midtown',
       rating: 4.6,
-      image: '/api/placeholder/300/200',
+      cuisine: 'Italian',
+      photo_url: '/api/placeholder/96/96',
       flavors: ['Savory', 'Cheesy', 'Herby']
+    },
+    {
+      id: 3,
+      name: 'Carnitas Tacos',
+      restaurant: 'Taqueria Azul',
+      location: 'Westside',
+      rating: 4.7,
+      cuisine: 'Mexican',
+      photo_url: '/api/placeholder/96/96',
+      flavors: ['Savory', 'Crispy']
+    },
+    {
+      id: 4,
+      name: 'Kung Pao Chicken',
+      restaurant: 'Sichuan Garden',
+      location: 'Chinatown',
+      rating: 4.5,
+      cuisine: 'Chinese',
+      photo_url: '/api/placeholder/96/96',
+      flavors: ['Spicy', 'Tangy']
     }
-  ]
+  ])
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof favorites>()
+
+    for (const item of favorites) {
+      const key = item.cuisine || 'Other'
+      const arr = map.get(key)
+      if (arr) {
+        arr.push(item)
+      } else {
+        map.set(key, [item])
+      }
+    }
+
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+  }, [favorites])
+
+  const [pendingRemove, setPendingRemove] = useState<{ id: number; name: string } | null>(null)
+
+  const handleUnfavorite = (dishId: number) => {
+    const item = favorites.find((x) => x.id === dishId)
+    if (!item) return
+    setPendingRemove({ id: item.id, name: item.name })
+  }
 
   return (
     <div className="space-y-6">
@@ -33,41 +82,78 @@ export function Favorites() {
         </p>
       </div>
 
-      <div className="grid gap-4">
-        {favorites.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="flex">
-              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center">
-                <Heart className="text-gray-400" size={24} />
-              </div>
-              <div className="flex-1 p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg text-gray-900">{item.name}</h3>
-                    <p className="text-gray-600">{item.restaurant}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <MapPin size={14} className="text-gray-400" />
-                      <span className="text-sm text-gray-500">{item.location}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star size={16} className="text-yellow-500 fill-current" />
-                    <span className="text-sm font-medium">{item.rating}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-3">
-                  {item.flavors.map((flavor) => (
-                    <span
-                      key={flavor}
-                      className="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full"
-                    >
-                      {flavor}
-                    </span>
-                  ))}
-                </div>
+      <div className="space-y-8">
+        {grouped.map(([cuisine, items]) => (
+          <section key={cuisine} className="space-y-3">
+            <div className="flex items-center gap-3">
+              <DishThumbnail
+                photoUrl={items[0]?.photo_url}
+                alt={cuisine}
+                size="lg"
+                className="w-12 h-12"
+              />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">{cuisine}</h3>
+                <p className="text-sm text-gray-600">{items.length} saved</p>
               </div>
             </div>
-          </div>
+
+            <div className="space-y-3">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                >
+                  <div className="flex">
+                    <div className="p-3">
+                      <DishThumbnail photoUrl={item.photo_url} alt={item.name} size="lg" />
+                    </div>
+
+                    <div className="flex-1 p-4 pl-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                          <p className="text-sm text-gray-600">{item.restaurant}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <MapPin size={14} className="text-gray-400" />
+                            <span className="text-sm text-gray-500">{item.location}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex items-center gap-1">
+                            <Star size={16} className="text-yellow-500 fill-current" />
+                            <span className="text-sm font-medium">{item.rating}</span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUnfavorite(item.id)}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-red-700 hover:bg-red-50"
+                            aria-label={`Remove ${item.name} from favorites`}
+                          >
+                            <Trash2 size={16} />
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {item.flavors.map((flavor) => (
+                          <span
+                            key={flavor}
+                            className="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full"
+                          >
+                            {flavor}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
 
@@ -78,6 +164,21 @@ export function Favorites() {
           <p className="text-gray-600">Start exploring and save your favorite dishes!</p>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pendingRemove}
+        title="Remove favorite"
+        message={pendingRemove ? `Remove "${pendingRemove.name}" from your favorites?` : undefined}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        isDanger
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={() => {
+          if (!pendingRemove) return
+          setFavorites((prev) => prev.filter((x) => x.id !== pendingRemove.id))
+          setPendingRemove(null)
+        }}
+      />
     </div>
   )
 }

@@ -1,7 +1,14 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Search, MapPin, Star, Phone, Globe, Clock, Filter } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
+import { loadRouteState, saveRouteState } from '../routeState'
+import { RestaurantThumbnail } from '../components/RestaurantThumbnail'
 
 export function Restaurants() {
+  const location = useLocation()
+
+  const restoreKey = useMemo(() => 'restaurants:list', [])
+
   // Mock data for restaurants
   const restaurants = [
     {
@@ -12,6 +19,7 @@ export function Restaurants() {
       priceRange: "$$",
       distance: "0.8 mi",
       address: "123 Main St, Downtown",
+      photo_url: '/api/placeholder/640/360',
       phone: "(555) 123-4567",
       website: "bangkokkitchen.com",
       hours: "11:00 AM - 10:00 PM",
@@ -26,6 +34,7 @@ export function Restaurants() {
       priceRange: "$$",
       distance: "1.2 mi",
       address: "456 Oak Ave, Midtown",
+      photo_url: '/api/placeholder/640/360',
       phone: "(555) 234-5678",
       website: "seoulhouse.com",
       hours: "12:00 PM - 11:00 PM",
@@ -40,6 +49,7 @@ export function Restaurants() {
       priceRange: "$",
       distance: "2.1 mi",
       address: "789 Pine St, Uptown",
+      photo_url: '/api/placeholder/640/360',
       phone: "(555) 345-6789",
       website: "tokyoexpress.com",
       hours: "11:30 AM - 9:30 PM",
@@ -54,6 +64,7 @@ export function Restaurants() {
       priceRange: "$$$",
       distance: "3.5 mi",
       address: "321 Elm St, Westside",
+      photo_url: '/api/placeholder/640/360',
       phone: "(555) 456-7890",
       website: "meddelights.com",
       hours: "5:00 PM - 11:00 PM",
@@ -67,6 +78,24 @@ export function Restaurants() {
   ]
 
   const priceFilters = ["All", "$", "$$", "$$$", "$$$$"]
+
+  useEffect(() => {
+    const state = (location.state || {}) as { restore?: boolean; restoreKey?: string }
+    if (!state.restore || state.restoreKey !== restoreKey) return
+
+    const cached = loadRouteState<Record<string, never>>(restoreKey)
+    if (!cached) return
+
+    requestAnimationFrame(() => {
+      window.scrollTo(0, cached.scroll.scrollY)
+    })
+  }, [location.state, restoreKey])
+
+  useEffect(() => {
+    const handleSave = () => saveRouteState(restoreKey, {}, window.scrollY)
+    window.addEventListener('scroll', handleSave, { passive: true })
+    return () => window.removeEventListener('scroll', handleSave)
+  }, [restoreKey])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,99 +185,111 @@ export function Restaurants() {
 
         <div className="space-y-6">
           {restaurants.map((restaurant) => (
-            <div key={restaurant.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{restaurant.name}</h3>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {restaurant.cuisine.map((c) => (
-                      <span key={c} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                      {restaurant.rating}
-                    </div>
-                    <div>{restaurant.priceRange}</div>
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {restaurant.distance}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-semibold text-green-600">Open</div>
-                  <div className="text-sm text-gray-500">Closes {restaurant.hours.split(' - ')[1]}</div>
-                </div>
-              </div>
+            <div key={restaurant.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <RestaurantThumbnail photoUrl={restaurant.photo_url} alt={restaurant.name} />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {restaurant.address}
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {restaurant.phone}
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {restaurant.hours}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-1">Popular Dishes</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {restaurant.popularDishes.map((dish) => (
-                        <span key={dish} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded">
-                          {dish}
-                        </span>
-                      ))}
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{restaurant.name}</h3>
+                    <div className="text-sm text-gray-600 mb-3">
+                      {restaurant.address}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                        {restaurant.rating}
+                      </div>
+                      <div>{restaurant.priceRange}</div>
+                      <div className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {restaurant.distance}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-1">Specialties</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {restaurant.specialties.map((specialty) => (
-                        <span key={specialty} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded">
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="text-right">
+                    <div className="text-lg font-semibold text-green-600">Open</div>
+                    <div className="text-sm text-gray-500">Closes {restaurant.hours.split(' - ')[1]}</div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-between items-center pt-4 border-t">
-                <div className="flex gap-2">
-                  <a
-                    href={`tel:${restaurant.phone}`}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Call
-                  </a>
-                  <a
-                    href={`https://${restaurant.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    Website
-                  </a>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {restaurant.cuisine.map((c) => (
+                    <span key={c} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                      {c}
+                    </span>
+                  ))}
                 </div>
-                <div className="flex gap-2">
-                  <Link
-                    to={`/search?restaurant=${encodeURIComponent(restaurant.name)}`}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    View Menu
-                  </Link>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <Phone className="w-4 h-4 mr-2" />
+                      {restaurant.phone}
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {restaurant.hours}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 mb-1">Popular Dishes</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {restaurant.popularDishes.map((dish) => (
+                          <span key={dish} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded">
+                            {dish}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 mb-1">Specialties</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {restaurant.specialties.map((specialty) => (
+                          <span key={specialty} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded">
+                            {specialty}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <div className="flex gap-2">
+                    <a
+                      href={`tel:${restaurant.phone}`}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Call
+                    </a>
+                    <a
+                      href={`https://${restaurant.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
+                    >
+                      <Globe className="w-4 h-4 mr-2" />
+                      Website
+                    </a>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/restaurants/${encodeURIComponent(restaurant.name)}`}
+                      state={{ from: location.pathname + location.search, restoreKey }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      onClick={() => saveRouteState(restoreKey, {}, window.scrollY)}
+                    >
+                      View Details
+                    </Link>
+                    <Link
+                      to={`/search?restaurant=${encodeURIComponent(restaurant.name)}`}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      View Menu
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

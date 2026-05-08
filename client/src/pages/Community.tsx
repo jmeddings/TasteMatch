@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom'
-import { Star, Heart, MessageCircle, User, Camera, TrendingUp, Clock, MapPin } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Star, Heart, MessageCircle, User, Camera, TrendingUp } from 'lucide-react'
 
 export function Community() {
+  const location = useLocation()
+
   // Mock data for community content
   const recentReviews = [
     {
@@ -135,7 +137,7 @@ export function Community() {
                     {/* Images */}
                     {review.images.length > 0 && (
                       <div className="flex gap-2 mb-4">
-                        {review.images.map((image, index) => (
+                        {review.images.map((_image, index) => (
                           <div
                             key={index}
                             className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center"
@@ -163,6 +165,7 @@ export function Community() {
                       </div>
                       <Link
                         to={`/restaurants/${encodeURIComponent(review.restaurant)}`}
+                        state={{ from: location.pathname + location.search, restoreKey: 'community' }}
                         className="text-blue-600 hover:text-blue-800"
                       >
                         View Restaurant →

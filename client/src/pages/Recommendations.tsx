@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Star, MapPin, Clock, Heart, ArrowRight } from 'lucide-react'
+import { DishThumbnail } from '../components/DishThumbnail'
 
 export function Recommendations() {
+  const location = useLocation()
+
   // Mock data for recommendations
   const recommendations = [
     {
@@ -13,7 +16,8 @@ export function Recommendations() {
       distance: "0.8 mi",
       price: "$$",
       rating: 4.5,
-      reason: "Based on your love for spicy dishes"
+      reason: "Based on your love for spicy dishes",
+      photo_url: '/api/placeholder/96/96'
     },
     {
       id: 2,
@@ -24,7 +28,8 @@ export function Recommendations() {
       distance: "1.2 mi",
       price: "$$",
       rating: 4.3,
-      reason: "Similar to your favorite Mixed Rice Bowl"
+      reason: "Similar to your favorite Mixed Rice Bowl",
+      photo_url: '/api/placeholder/96/96'
     },
     {
       id: 3,
@@ -35,7 +40,8 @@ export function Recommendations() {
       distance: "2.1 mi",
       price: "$",
       rating: 4.7,
-      reason: "Rich umami flavors you enjoy"
+      reason: "Rich umami flavors you enjoy",
+      photo_url: '/api/placeholder/96/96'
     }
   ]
 
@@ -82,7 +88,8 @@ export function Recommendations() {
         <div className="space-y-4">
           {recommendations.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex items-start gap-4 mb-4">
+                <DishThumbnail photoUrl={item.photo_url} alt={item.dishName} size="lg" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900">{item.dishName}</h3>
                   <p className="text-gray-600">{item.restaurantName}</p>
@@ -121,7 +128,8 @@ export function Recommendations() {
                     <Heart className="w-5 h-5" />
                   </button>
                   <Link 
-                    to={`/restaurants/${item.restaurantName}`}
+                    to={`/restaurants/${encodeURIComponent(item.restaurantName)}`}
+                    state={{ from: location.pathname + location.search, restoreKey: 'recommendations' }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     View Details
