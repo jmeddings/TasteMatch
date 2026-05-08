@@ -1,8 +1,6 @@
-const { Request, Response } = require('express')
-const { getSupabase } = require('../config/supabase')
+const { supabase } = require('../config/supabase')
 
 async function getAuthedUser(req) {
-  const supabase = getSupabase()
   const authHeader = req.headers.authorization
   if (!authHeader) {
     return { error: { status: 401, message: 'No authorization header provided' } }
@@ -20,7 +18,6 @@ async function getAuthedUser(req) {
 
 async function listDrafts(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 
@@ -50,7 +47,6 @@ async function listDrafts(req, res) {
 
 async function getDraft(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 
@@ -76,7 +72,6 @@ async function getDraft(req, res) {
 
 async function upsertDraft(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 
@@ -114,7 +109,6 @@ async function upsertDraft(req, res) {
 
 async function autosaveDraft(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 
@@ -168,7 +162,6 @@ async function autosaveDraft(req, res) {
 
 async function resumeDraft(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 
@@ -203,7 +196,6 @@ async function resumeDraft(req, res) {
 
 async function deleteDraft(req, res) {
   try {
-    const supabase = getSupabase()
     const { user, error } = await getAuthedUser(req)
     if (error) return res.status(error.status).json({ success: false, error: error.message })
 

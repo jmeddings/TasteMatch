@@ -1,21 +1,30 @@
-const { Request, Response } = require('express')
-const { getSupabase } = require('../config/supabase')
+const { supabase } = require('../config/supabase')
 
-async function requireUser(req) {
-  const supabase = getSupabase()
-  const token = req.headers.authorization?.replace('Bearer ', '')
-  if (!token) throw new Error('Unauthorized')
-  const { data: { user }, error } = await supabase.auth.getUser(token)
-  if (error || !user) {
-    throw new Error('Invalid token')
+async function getAuthedUser(req) {
+  const authHeader = req.headers.authorization
+  if (!authHeader) {
+    return { error: { status: 401, message: 'No authorization header provided' } }
   }
-  return user
+
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+
+  if (error || !user) {
+    return { error: { status: 401, message: 'Invalid token' } }
+  }
+
+  return { user }
+}
+
+function normalizeStatus(status) {
+  if (status === 'draft' || status === 'published') return status
+  return null
 }
 
 async function createReview(req, res) {
   try {
-    const supabase = getSupabase()
-    const user = await requireUser(req)
+    const { user, error } = await getAuthedUser(req)
+    if (error) return res.status(error.status).json({ success: false, error: error.message })
 
     const { dish_id, rating, content, photo_urls, status, draft_id } = req.body
 
@@ -67,8 +76,8 @@ async function createReview(req, res) {
 
 async function getReview(req, res) {
   try {
-    const supabase = getSupabase()
-    const user = await requireUser(req)
+    const { user, error } = await getAuthedUser(req)
+    if (error) return res.status(error.status).json({ success: false, error: error.message })
 
     const { id } = req.params
 
@@ -92,8 +101,8 @@ async function getReview(req, res) {
 
 async function listReviews(req, res) {
   try {
-    const supabase = getSupabase()
-    const user = await requireUser(req)
+    const { user, error } = await getAuthedUser(req)
+    if (error) return res.status(error.status).json({ success: false, error: error.message })
 
     const { dish_id, status } = req.query
 
@@ -122,8 +131,8 @@ async function listReviews(req, res) {
 
 async function updateReview(req, res) {
   try {
-    const supabase = getSupabase()
-    const user = await requireUser(req)
+    const { user, error } = await getAuthedUser(req)
+    if (error) return res.status(error.status).json({ success: false, error: error.message })
 
     const { id } = req.params
     const { rating, content, photo_urls, status, draft_id } = req.body
@@ -178,8 +187,8 @@ async function updateReview(req, res) {
 
 async function deleteReview(req, res) {
   try {
-    const supabase = getSupabase()
-    const user = await requireUser(req)
+    const { user, error } = await getAuthedUser(req)
+    if (error) return res.status(error.status).json({ success: false, error: error.message })
 
     const { id } = req.params
 
