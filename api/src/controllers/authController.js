@@ -1,8 +1,9 @@
 const { Request, Response } = require('express')
-const { supabase } = require('../config/supabase')
+const { getSupabase } = require('../config/supabase')
 
 async function signUp(req, res) {
   try {
+    const supabase = getSupabase()
     const { email, password, username } = req.body
 
     if (!email || !password) {
@@ -84,15 +85,15 @@ async function signUp(req, res) {
 
 async function getTasteProfile(req, res) {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader) {
+    const supabase = getSupabase()
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No authorization header provided'
       })
     }
 
-    const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
@@ -124,15 +125,15 @@ async function getTasteProfile(req, res) {
 
 async function updateTasteProfile(req, res) {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader) {
+    const supabase = getSupabase()
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No authorization header provided'
       })
     }
 
-    const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
@@ -174,15 +175,15 @@ async function updateTasteProfile(req, res) {
 
 async function deleteAccount(req, res) {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader) {
+    const supabase = getSupabase()
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No authorization header provided'
       })
     }
 
-    const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
@@ -206,6 +207,7 @@ async function deleteAccount(req, res) {
 
 async function signIn(req, res) {
   try {
+    const supabase = getSupabase()
     const { email, password } = req.body
 
     if (!email || !password) {
@@ -267,15 +269,15 @@ async function signIn(req, res) {
 
 async function signOut(req, res) {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader) {
+    const supabase = getSupabase()
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No authorization header provided'
       })
     }
 
-    const token = authHeader.replace('Bearer ', '')
     const { error } = await supabase.auth.admin.signOut(token)
 
     if (error) {
@@ -300,15 +302,14 @@ async function signOut(req, res) {
 
 async function getProfile(req, res) {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader) {
+    const supabase = getSupabase()
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No authorization header provided'
       })
     }
-
-    const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {

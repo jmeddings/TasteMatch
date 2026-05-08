@@ -1,8 +1,9 @@
 const { Request, Response } = require('express')
-const { supabase } = require('../config/supabase')
+const { getSupabase } = require('../config/supabase')
 
 async function searchDishes(req, res) {
   try {
+    const supabase = getSupabase()
     const { q, location, limit = 20, offset = 0 } = req.query
 
     if (!q) {
@@ -107,6 +108,7 @@ async function searchDishes(req, res) {
 
 async function searchByFlavor(req, res) {
   try {
+    const supabase = getSupabase()
     const { flavors, location, limit = 20, offset = 0 } = req.query
 
     if (!flavors) {
@@ -263,6 +265,7 @@ async function searchByImage(req, res) {
 
 async function searchSuggestions(req, res) {
   try {
+    const supabase = getSupabase()
     const { q } = req.query
 
     if (!q || typeof q !== 'string' || q.length < 2) {
@@ -314,6 +317,7 @@ async function searchSuggestions(req, res) {
 
 async function searchByTexture(req, res) {
   try {
+    const supabase = getSupabase()
     const { textures, location, limit = 20, offset = 0 } = req.query
 
     if (!textures) {

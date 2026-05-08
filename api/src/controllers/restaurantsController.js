@@ -1,8 +1,9 @@
 const { Request, Response } = require('express')
-const { supabase } = require('../config/supabase')
+const { getSupabase } = require('../config/supabase')
 
 async function getRestaurants(req, res) {
   try {
+    const supabase = getSupabase()
     const { city, cuisine, rating, limit = 20, offset = 0 } = req.query
 
     let query = supabase
@@ -51,6 +52,7 @@ async function getRestaurants(req, res) {
 
 async function getRestaurantById(req, res) {
   try {
+    const supabase = getSupabase()
     const { id } = req.params
 
     if (!id) {
@@ -102,6 +104,7 @@ async function getRestaurantById(req, res) {
 
 async function getNearbyRestaurants(req, res) {
   try {
+    const supabase = getSupabase()
     const { latitude, longitude, radius = 10, limit = 20 } = req.query
 
     if (!latitude || !longitude) {
@@ -167,6 +170,7 @@ async function getNearbyRestaurants(req, res) {
 
 async function createRestaurant(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({
@@ -250,6 +254,7 @@ async function createRestaurant(req, res) {
 
 async function updateRestaurant(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({
@@ -314,6 +319,7 @@ async function updateRestaurant(req, res) {
 
 async function deleteRestaurant(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({

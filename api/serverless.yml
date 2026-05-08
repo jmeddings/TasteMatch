@@ -1,6 +1,8 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: tastematch
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: taste-match
 service: tastematch-api
-
-frameworkVersion: '4'
 
 provider:
   name: aws
@@ -12,7 +14,7 @@ provider:
   httpApi:
     cors:
       allowedOrigins:
-        - ${env:AMPLIFY_APP_ORIGIN}
+        - ${env:AMPLIFY_APP_ORIGIN, 'http://localhost:5173'}
         - http://localhost:5173
       allowedHeaders:
         - Content-Type
@@ -27,7 +29,7 @@ provider:
       allowCredentials: true
 
   environment:
-    SECRETS_ID: ${env:SECRETS_ID}
+    SECRETS_ID: ${env:SECRETS_ID, ''}
 
   iam:
     role:
@@ -36,7 +38,7 @@ provider:
           Action:
             - secretsmanager:GetSecretValue
           Resource:
-            - arn:aws:secretsmanager:${aws:region}:${aws:accountId}:secret:${env:SECRETS_ID}*
+            - arn:aws:secretsmanager:${aws:region}:${aws:accountId}:secret:${env:SECRETS_ID, '*'}
 
 functions:
   api:

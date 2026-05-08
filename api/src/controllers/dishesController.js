@@ -1,8 +1,9 @@
 const { Request, Response } = require('express')
-const { supabase } = require('../config/supabase')
+const { getSupabase } = require('../config/supabase')
 
 async function getDishById(req, res) {
   try {
+    const supabase = getSupabase()
     const { id } = req.params
 
     if (!id) {
@@ -86,6 +87,7 @@ async function getDishById(req, res) {
 
 async function getSimilarDishes(req, res) {
   try {
+    const supabase = await getSupabase()
     const { id } = req.params
     const { limit = 10 } = req.query
 
@@ -214,6 +216,7 @@ async function getSimilarDishes(req, res) {
 
 async function addReview(req, res) {
   try {
+    const supabase = await getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({
@@ -315,6 +318,7 @@ async function addReview(req, res) {
 
 async function getDishReviews(req, res) {
   try {
+    const supabase = await getSupabase()
     const { id } = req.params
     const { limit = 20, offset = 0 } = req.query
 
@@ -385,6 +389,7 @@ async function getDishReviews(req, res) {
 
 async function createDish(req, res) {
   try {
+    const supabase = await getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({

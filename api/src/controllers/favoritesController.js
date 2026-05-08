@@ -1,8 +1,9 @@
 const { Request, Response } = require('express')
-const { supabase } = require('../config/supabase')
+const { getSupabase } = require('../config/supabase')
 
 async function getFavorites(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({
@@ -122,6 +123,7 @@ async function getFavorites(req, res) {
 
 async function addFavorite(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({
@@ -213,6 +215,7 @@ async function addFavorite(req, res) {
 
 async function removeFavorite(req, res) {
   try {
+    const supabase = getSupabase()
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({

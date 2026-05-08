@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "offline": "npm --prefix api run offline",
+    "deploy": "npm --prefix api run deploy"
+  },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1045.0",
     "serverless-http": "^4.0.0",
