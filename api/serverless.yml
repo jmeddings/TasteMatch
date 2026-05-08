@@ -15,6 +15,7 @@ provider:
     cors:
       allowedOrigins:
         - ${env:AMPLIFY_APP_ORIGIN, 'http://localhost:5173'}
+        - https://main.d2oe0266shuvyf.amplifyapp.com
         - http://localhost:5173
       allowedHeaders:
         - Content-Type
@@ -30,6 +31,7 @@ provider:
 
   environment:
     SECRETS_ID: ${env:SECRETS_ID, ''}
+    CLIENT_URL: ${env:AMPLIFY_APP_ORIGIN, 'http://localhost:5173'}
 
   iam:
     role:

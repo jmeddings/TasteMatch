@@ -19,7 +19,23 @@ const app = express()
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      const allowList = new Set([
+        'http://localhost:5173',
+        'https://main.d2oe0266shuvyf.amplifyapp.com'
+      ])
+
+      const configured = (process.env.CLIENT_URL || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+
+      for (const o of configured) allowList.add(o)
+
+      if (!origin) return callback(null, true)
+      if (allowList.has(origin)) return callback(null, true)
+      return callback(null, false)
+    },
     credentials: true
   })
 )
