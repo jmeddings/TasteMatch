@@ -1,6 +1,21 @@
 const { Request, Response } = require('express')
 const { getSupabase } = require('../config/supabase')
 
+async function ensureProfileRow(supabase, user) {
+  if (!user?.id) return
+
+  const profile = {
+    id: user.id,
+    email: user.email || '',
+    name: user.user_metadata?.username || user.user_metadata?.name || null,
+    updated_at: new Date().toISOString()
+  }
+
+  await supabase
+    .from('profiles')
+    .upsert(profile, { onConflict: 'id' })
+}
+
 async function signUp(req, res) {
   try {
     const supabase = getSupabase()
@@ -103,6 +118,8 @@ async function getTasteProfile(req, res) {
       })
     }
 
+    await ensureProfileRow(supabase, user)
+
     const { data: tasteProfile, error } = await supabase
       .from('taste_profiles')
       .select('user_id, preferences, onboarding_complete, updated_at')
@@ -157,6 +174,8 @@ async function updateTasteProfile(req, res) {
         error: 'Invalid token'
       })
     }
+
+    await ensureProfileRow(supabase, user)
 
     const { preferences, onboarding_complete } = req.body
 
