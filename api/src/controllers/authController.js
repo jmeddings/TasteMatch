@@ -146,6 +146,7 @@ async function updateTasteProfile(req, res) {
     const { preferences, onboarding_complete } = req.body
 
     const updateData = {
+      user_id: user.id,
       updated_at: new Date().toISOString()
     }
 
@@ -154,8 +155,7 @@ async function updateTasteProfile(req, res) {
 
     const { data: tasteProfile, error } = await supabase
       .from('taste_profiles')
-      .update(updateData)
-      .eq('user_id', user.id)
+      .upsert(updateData, { onConflict: 'user_id' })
       .select('user_id, preferences, onboarding_complete, updated_at')
       .single()
 
