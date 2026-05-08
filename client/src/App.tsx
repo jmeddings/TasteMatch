@@ -1,5 +1,9 @@
 import { Routes, Route } from 'react-router-dom'
 import { Home } from './pages/Home'
+import { Welcome } from './pages/Welcome'
+import { Login } from './pages/Login'
+import { Signup } from './pages/Signup'
+import { Onboarding } from './pages/Onboarding'
 import { Search } from './pages/Search'
 import { Recommendations } from './pages/Recommendations'
 import { Favorites } from './pages/Favorites'
@@ -15,6 +19,10 @@ function App() {
   return (
     <Layout>
       <Routes>
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/recommendations" element={<Recommendations />} />

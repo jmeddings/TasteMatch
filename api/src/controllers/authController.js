@@ -3,12 +3,19 @@ const { supabase } = require('../config/supabase')
 
 async function signUp(req, res) {
   try {
-    const { email, password, name } = req.body
+    const { email, password, username } = req.body
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         error: 'Email and password are required'
+      })
+    }
+
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        error: 'Username is required'
       })
     }
 
@@ -18,7 +25,7 @@ async function signUp(req, res) {
       password,
       options: {
         data: {
-          name: name || null
+          username
         }
       }
     })
@@ -37,11 +44,23 @@ async function signUp(req, res) {
         .insert({
           id: data.user.id,
           email: data.user.email,
-          name: name || null
+          name: username
         })
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
+      }
+
+      const { error: tasteProfileError } = await supabase
+        .from('taste_profiles')
+        .insert({
+          user_id: data.user.id,
+          preferences: {},
+          onboarding_complete: false
+        })
+
+      if (tasteProfileError) {
+        console.error('Taste profile creation error:', tasteProfileError)
       }
     }
 
@@ -50,7 +69,7 @@ async function signUp(req, res) {
       data: {
         id: data.user?.id,
         email: data.user?.email,
-        name: data.user?.user_metadata?.name || null
+        username: data.user?.user_metadata?.username || null
       },
       message: 'User registered successfully'
     })
@@ -60,6 +79,128 @@ async function signUp(req, res) {
       success: false,
       error: 'Failed to sign up'
     })
+  }
+}
+
+async function getTasteProfile(req, res) {
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: 'No authorization header provided'
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token'
+      })
+    }
+
+    const { data: tasteProfile, error } = await supabase
+      .from('taste_profiles')
+      .select('user_id, preferences, onboarding_complete, updated_at')
+      .eq('user_id', user.id)
+      .single()
+
+    if (error || !tasteProfile) {
+      return res.status(404).json({
+        success: false,
+        error: 'TasteProfile not found'
+      })
+    }
+
+    return res.json({ success: true, data: tasteProfile })
+  } catch (error) {
+    console.error('Get taste profile error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to get TasteProfile' })
+  }
+}
+
+async function updateTasteProfile(req, res) {
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: 'No authorization header provided'
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token'
+      })
+    }
+
+    const { preferences, onboarding_complete } = req.body
+
+    const updateData = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (preferences !== undefined) updateData.preferences = preferences
+    if (onboarding_complete !== undefined) updateData.onboarding_complete = onboarding_complete
+
+    const { data: tasteProfile, error } = await supabase
+      .from('taste_profiles')
+      .update(updateData)
+      .eq('user_id', user.id)
+      .select('user_id, preferences, onboarding_complete, updated_at')
+      .single()
+
+    if (error || !tasteProfile) {
+      return res.status(400).json({
+        success: false,
+        error: error?.message || 'Failed to update TasteProfile'
+      })
+    }
+
+    return res.json({ success: true, data: tasteProfile })
+  } catch (error) {
+    console.error('Update taste profile error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to update TasteProfile' })
+  }
+}
+
+async function deleteAccount(req, res) {
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: 'No authorization header provided'
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token'
+      })
+    }
+
+    const { error } = await supabase.auth.admin.deleteUser(user.id)
+    if (error) {
+      return res.status(400).json({ success: false, error: error.message })
+    }
+
+    return res.json({ success: true })
+  } catch (error) {
+    console.error('Delete account error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to delete account' })
   }
 }
 
@@ -282,5 +423,8 @@ module.exports = {
   signIn,
   signOut,
   getProfile,
-  updateProfile
+  updateProfile,
+  getTasteProfile,
+  updateTasteProfile,
+  deleteAccount
 }

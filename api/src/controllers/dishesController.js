@@ -601,8 +601,6 @@ async function deleteDish(req, res) {
 module.exports = {
   getDishById,
   getSimilarDishes,
-  addReview,
-  getDishReviews,
   createDish,
   updateDish,
   deleteDish

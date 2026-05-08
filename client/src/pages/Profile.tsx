@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { User, Settings, LogOut, Share2, UserMinus, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { apiRequest, clearStoredSession, getStoredSession } from '../auth'
+import { useNavigate } from 'react-router-dom'
 
 export function Profile() {
+  const navigate = useNavigate()
+  const session = getStoredSession()
   const [confirmUnfollowOpen, setConfirmUnfollowOpen] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -75,7 +80,14 @@ export function Profile() {
             <span className="text-gray-400">›</span>
           </button>
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => {
+              clearStoredSession()
+              navigate('/welcome')
+            }}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-t border-gray-200"
+          >
             <div className="flex items-center gap-3">
               <LogOut size={20} className="text-red-600" />
               <span className="font-medium text-red-600">Log Out</span>
@@ -105,9 +117,28 @@ export function Profile() {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         isDanger
-        onCancel={() => setConfirmDeleteOpen(false)}
-        onConfirm={() => {
-          setConfirmDeleteOpen(false)
+        disabled={deleting}
+        onCancel={() => (deleting ? null : setConfirmDeleteOpen(false))}
+        onConfirm={async () => {
+          if (!session?.accessToken) {
+            clearStoredSession()
+            setConfirmDeleteOpen(false)
+            navigate('/welcome')
+            return
+          }
+
+          setDeleting(true)
+          try {
+            await apiRequest('/api/auth/account', {
+              method: 'DELETE',
+              accessToken: session.accessToken
+            })
+          } finally {
+            clearStoredSession()
+            setDeleting(false)
+            setConfirmDeleteOpen(false)
+            navigate('/welcome')
+          }
         }}
       />
     </div>

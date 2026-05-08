@@ -5,6 +5,13 @@ import { DishThumbnail } from '../components/DishThumbnail'
 export function Recommendations() {
   const location = useLocation()
 
+  const colorTagStyles: Record<string, string> = {
+    spicy_bold: 'bg-red-50 border-red-200',
+    comfort: 'bg-yellow-50 border-yellow-200',
+    light_fresh: 'bg-green-50 border-green-200',
+    sweet_desserts: 'bg-pink-50 border-pink-200'
+  }
+
   // Mock data for recommendations
   const recommendations = [
     {
@@ -17,7 +24,8 @@ export function Recommendations() {
       price: "$$",
       rating: 4.5,
       reason: "Based on your love for spicy dishes",
-      photo_url: '/api/placeholder/96/96'
+      photo_url: '/api/placeholder/96/96',
+      color_tag: 'spicy_bold'
     },
     {
       id: 2,
@@ -29,7 +37,8 @@ export function Recommendations() {
       price: "$$",
       rating: 4.3,
       reason: "Similar to your favorite Mixed Rice Bowl",
-      photo_url: '/api/placeholder/96/96'
+      photo_url: '/api/placeholder/96/96',
+      color_tag: 'comfort'
     },
     {
       id: 3,
@@ -41,7 +50,8 @@ export function Recommendations() {
       price: "$",
       rating: 4.7,
       reason: "Rich umami flavors you enjoy",
-      photo_url: '/api/placeholder/96/96'
+      photo_url: '/api/placeholder/96/96',
+      color_tag: 'light_fresh'
     }
   ]
 
@@ -87,7 +97,12 @@ export function Recommendations() {
 
         <div className="space-y-4">
           {recommendations.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div
+              key={item.id}
+              className={`rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border ${
+                colorTagStyles[item.color_tag] || 'bg-white border-gray-200'
+              }`}
+            >
               <div className="flex items-start gap-4 mb-4">
                 <DishThumbnail photoUrl={item.photo_url} alt={item.dishName} size="lg" />
                 <div className="flex-1">

@@ -1,5 +1,14 @@
 const { Router } = require('express')
-const { signUp, signIn, signOut, getProfile, updateProfile } = require('../controllers/authController')
+const {
+  signUp,
+  signIn,
+  signOut,
+  getProfile,
+  updateProfile,
+  getTasteProfile,
+  updateTasteProfile,
+  deleteAccount
+} = require('../controllers/authController')
 
 const router = Router()
 
@@ -17,5 +26,12 @@ router.get('/profile', getProfile)
 
 // Update user profile
 router.put('/profile', updateProfile)
+
+// Taste profile (onboarding)
+router.get('/taste-profile', getTasteProfile)
+router.put('/taste-profile', updateTasteProfile)
+
+// Delete account
+router.delete('/account', deleteAccount)
 
 module.exports = { authRouter: router }

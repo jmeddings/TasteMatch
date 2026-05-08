@@ -9,6 +9,8 @@ const { favoritesRouter } = require('./routes/favorites')
 const { authRouter } = require('./routes/auth')
 const { restaurantsRouter } = require('./routes/restaurants')
 const { dishesRouter } = require('./routes/dishes')
+const { reviewsRouter } = require('./routes/reviews')
+const { draftsRouter } = require('./routes/drafts')
 const { errorHandler } = require('./middleware/errorHandler')
 
 dotenv.config()
@@ -41,6 +43,8 @@ app.use('/api/search', searchRouter)
 app.use('/api/favorites', favoritesRouter)
 app.use('/api/restaurants', restaurantsRouter)
 app.use('/api/dishes', dishesRouter)
+app.use('/api/reviews', reviewsRouter)
+app.use('/api/drafts', draftsRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {
