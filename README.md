@@ -2,9 +2,28 @@
 
 A mobile application that helps users find dishes and restaurants similar to foods they already enjoy.
 
+## Live App
+
+https://main.d2oe0266shuvyf.amplifyapp.com
+
 ## Overview
 
 TasteMatch is a community-driven platform that analyzes taste and texture to recommend similar food options nearby. Users can search by dish, flavor, or photo, save favorites, and share their food experiences.
+
+## System Functionality
+
+TasteMatch includes:
+
+- **Authentication + onboarding**
+  - Sign up / log in
+  - Onboarding step to choose taste preferences (stored in `taste_profiles`)
+- **Search + discovery**
+  - Search dishes
+  - Browse dish/restaurant details
+- **Favorites**
+  - Save and remove favorite dishes for your account
+- **Reviews**
+  - Create and view dish reviews (draft + publish supported by API)
 
 ## Features
 
@@ -70,6 +89,26 @@ TasteMatch/
 4. Configure environment variables (see Environment Variables section below)
 
 5. Run development servers (see Local Development section below)
+
+## Demo / What to Test
+
+- **Create your own account** in the app (no shared demo credentials are included).
+- **Onboarding**
+  - Pick 1+ preferences and continue
+- **API health**
+  - Local: `http://localhost:3001/api/health`
+  - Deployed: `https://fjpvs0ugk0.execute-api.us-east-1.amazonaws.com/api/health`
+
+## Known Issues / Incomplete Areas
+
+- **Amplify SPA routing (React Router)**
+  - Direct navigation to routes like `/onboarding` requires Amplify rewrite rules.
+- **Supabase RLS + profile bootstrapping**
+  - If you are creating tables manually in an existing Supabase project, ensure your RLS policies allow creating the `profiles` row for new users, otherwise `taste_profiles` inserts can fail due to the FK to `profiles(id)`.
+- **Serverless deployment**
+  - The backend deploy is configured for Serverless Framework + AWS. Full deployments require valid AWS credentials and (optionally) an AWS Secrets Manager `SECRETS_ID`.
+- **Feature flags**
+  - Some AI/photo features are stubbed/placeholder and may not be fully implemented.
 
 ### Environment Variables
 
